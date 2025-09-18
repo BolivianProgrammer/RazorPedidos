@@ -8,11 +8,7 @@ namespace PedidosApp.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-        }
 
-        // Define your DbSet properties for your entities here
-        // For example:
-        // public DbSet<Pedido> Pedidos { get; set; }
-        // public DbSet<Cliente> Clientes { get; set; }
+        }
     }
 }
