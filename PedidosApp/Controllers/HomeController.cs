@@ -15,6 +15,7 @@ namespace PedidosApp.Controllers
 
         public IActionResult Index()
         {
+            ViewData["WelcomeMessage"] = "Bienvenido al Sistema de Gestión de Pedidos";
             return View();
         }
 

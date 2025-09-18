@@ -8,8 +8,20 @@ html {
   }
 }
 
+:root {
+  --dark-bg: #121212;
+  --darker-bg: #1e1e1e;
+  --dark-card: #252525;
+  --dark-text: #e0e0e0;
+  --dark-text-secondary: #aaaaaa;
+  --dark-border: #333333;
+  --dark-hover: #2d2d2d;
+  --accent-color: #007bff;
+  --accent-hover: #0069d9;
+}
+
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem var(--dark-bg), 0 0 0 0.25rem var(--accent-color);
 }
 
 html {
@@ -19,4 +31,114 @@ html {
 
 body {
   margin-bottom: 60px;
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+/* Dark navbar */
+.navbar {
+  background-color: var(--darker-bg) !important;
+  border-bottom: 1px solid var(--dark-border) !important;
+}
+
+.navbar-brand, .nav-link {
+  color: var(--dark-text) !important;
+}
+
+.nav-link:hover {
+  color: var(--accent-color) !important;
+}
+
+/* Dark cards */
+.card {
+  background-color: var(--dark-card);
+  border: 1px solid var(--dark-border);
+}
+
+.card-title {
+  color: var(--dark-text);
+}
+
+.card-text {
+  color: var(--dark-text-secondary);
+}
+
+/* Dark inputs and forms */
+.form-control {
+  background-color: var(--darker-bg);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text);
+}
+
+.form-control:focus {
+  background-color: var(--darker-bg);
+  color: var(--dark-text);
+}
+
+/* Dark footer */
+.footer {
+  background-color: var(--darker-bg);
+  border-top: 1px solid var(--dark-border);
+  color: var(--dark-text-secondary);
+}
+
+.footer a {
+  color: var(--accent-color);
+}
+
+.footer a:hover {
+  color: var(--accent-hover);
+  text-decoration: none;
+}
+
+/* Override bootstrap text colors */
+.text-dark {
+  color: var(--dark-text) !important;
+}
+
+.text-muted {
+  color: var(--dark-text-secondary) !important;
+}
+
+/* Custom button styles */
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Table styles */
+.table {
+  color: var(--dark-text);
+}
+
+.table th, .table td {
+  border-top: 1px solid var(--dark-border);
+}
+
+.table thead th {
+  border-bottom: 2px solid var(--dark-border);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--darker-bg);
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  background-color: var(--dark-card);
+  border: 1px solid var(--dark-border);
+}
+
+.dropdown-item {
+  color: var(--dark-text);
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: var(--dark-hover);
+  color: var(--dark-text);
 }
