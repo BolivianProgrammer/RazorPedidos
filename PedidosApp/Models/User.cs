@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PedidosApp.Models
 {
@@ -24,14 +25,20 @@ namespace PedidosApp.Models
         [Required(ErrorMessage = "El rol es obligatorio")]
         public UserRole Role { get; set; }
 
+        [Display(Name = "Fecha de Creación")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = false)]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        [Display(Name = "Última Actualización")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = false)]
         public DateTime? UpdatedAt { get; set; }
     }
 
     public enum UserRole
     {
         Admin,
-        Employee,
-        Customer
+        Cliente
     }
 }

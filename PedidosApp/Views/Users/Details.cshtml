@@ -1,0 +1,50 @@
+@model PedidosApp.Models.User
+
+@{
+    ViewData["Title"] = "Detalles de Cliente";
+}
+
+<h1>Detalles de Cliente</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            Nombre
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-3">
+            Correo Electrónico
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt class="col-sm-3">
+            Rol
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Role)
+        </dd>
+        <dt class="col-sm-3">
+            Fecha de Creación
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.CreatedAt)
+        </dd>
+        @if (Model.UpdatedAt.HasValue)
+        {
+            <dt class="col-sm-3">
+                Última Actualización
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.UpdatedAt)
+            </dd>
+        }
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+</div>

@@ -12,8 +12,8 @@ html {
   --dark-bg: #121212;
   --darker-bg: #1e1e1e;
   --dark-card: #252525;
-  --dark-text: #e0e0e0;
-  --dark-text-secondary: #aaaaaa;
+  --dark-text: #ffffff;
+  --dark-text-secondary: #cccccc;
   --dark-border: #333333;
   --dark-hover: #2d2d2d;
   --accent-color: #007bff;
@@ -111,21 +111,22 @@ body {
   border-color: var(--accent-hover);
 }
 
-/* Table styles */
+/* Table styles - SIMPLIFIED */
 .table {
-  color: var(--dark-text);
+  color: white !important;
 }
 
-.table th, .table td {
-  border-top: 1px solid var(--dark-border);
+.table td, .table th {
+  color: white !important;
 }
 
-.table thead th {
-  border-bottom: 2px solid var(--dark-border);
+/* Ensure links in tables are visible */
+.table a {
+  color: #52a8ff !important;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: var(--darker-bg);
+.table a:hover {
+  color: #78bdff !important;
 }
 
 /* Dropdown menu */
