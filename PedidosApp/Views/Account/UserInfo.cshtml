@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Información de Usuario";
+    var role = ViewData["Role"] as string;
+}
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Información de Usuario</h2>
+        <p>Usuario: <strong>@User.Identity.Name</strong></p>
+        <p>Email: <strong>@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</strong></p>
+        <p>Rol: <strong>@role</strong></p>
+        
+        <hr />
+        
+        @if (role == "Admin")
+        {
+            <div class="alert alert-info">
+                <h4>Permisos de Administrador</h4>
+                <p>Como administrador, tienes acceso completo a todas las funcionalidades:</p>
+                <ul>
+                    <li>Gestionar usuarios (crear, editar, eliminar cualquier tipo de usuario)</li>
+                    <li>Gestionar productos</li>
+                    <li>Gestionar pedidos</li>
+                    <li>Ver reportes y estadísticas</li>
+                </ul>
+            </div>
+        }
+        else if (role == "Empleado")
+        {
+            <div class="alert alert-warning">
+                <h4>Permisos de Empleado</h4>
+                <p>Como empleado, tienes acceso a casi todas las funcionalidades:</p>
+                <ul>
+                    <li>Ver listado de todos los clientes</li>
+                    <li>Crear nuevos clientes (solo rol Cliente)</li>
+                    <li>Editar y eliminar clientes (solo rol Cliente)</li>
+                    <li>Ver y gestionar productos</li>
+                    <li>Ver y gestionar pedidos</li>
+                </ul>
+                <p><strong>Restricciones:</strong></p>
+                <ul>
+                    <li>No puedes crear usuarios con rol Admin o Empleado</li>
+                    <li>No puedes editar o eliminar usuarios con rol Admin o Empleado</li>
+                </ul>
+            </div>
+        }
+        else if (role == "Cliente")
+        {
+            <div class="alert alert-secondary">
+                <h4>Permisos de Cliente</h4>
+                <p>Como cliente, tienes acceso a:</p>
+                <ul>
+                    <li>Ver listado de productos</li>
+                    <li>Ver tus pedidos realizados</li>
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Volver al inicio</a>
+</div>

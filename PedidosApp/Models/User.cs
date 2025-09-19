@@ -39,6 +39,7 @@ namespace PedidosApp.Models
     public enum UserRole
     {
         Admin,
+        Empleado,
         Cliente
     }
 }

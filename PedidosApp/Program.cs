@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using PedidosApp.Data;
 
@@ -9,6 +10,31 @@ builder.Services.AddControllersWithViews();
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.Cookie.Name = "PedidosAppAuth";
+        options.Cookie.HttpOnly = true;
+        options.ExpireTimeSpan = TimeSpan.FromHours(24);
+    });
+
+// Add authorization
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireAdminOrEmpleadoRole", policy => policy.RequireRole("Admin", "Empleado"));
+    options.AddPolicy("AllRoles", policy => policy.RequireRole("Admin", "Empleado", "Cliente"));
+    options.AddPolicy("AdminForAdminEmpleadoCreation", policy => 
+        policy.RequireAssertion(context => 
+            context.User.IsInRole("Admin") || 
+            (context.User.IsInRole("Empleado") && 
+             context.Resource.ToString().Contains("Cliente"))));
+});
 
 var app = builder.Build();
 
@@ -25,6 +51,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
