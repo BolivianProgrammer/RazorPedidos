@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PedidosApp.Models;
+using System;
 
 namespace PedidosApp.Data
 {
@@ -8,7 +9,17 @@ namespace PedidosApp.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+        }
 
+        public DbSet<User> Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }

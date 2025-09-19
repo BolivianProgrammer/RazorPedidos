@@ -163,10 +163,10 @@ C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Deb
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\staticwebassets.development.json
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\PedidosApp.csproj.Up2Date
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\PedidosApp.dll
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\refint\PedidosApp.dll
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\PedidosApp.pdb
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\PedidosApp.genruntimeconfig.cache
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\ref\PedidosApp.dll
+C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
