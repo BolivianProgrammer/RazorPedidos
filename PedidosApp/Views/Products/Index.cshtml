@@ -6,6 +6,14 @@
 
 <h1>Productos</h1>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
 {
     <p>
@@ -29,10 +37,7 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Stock)
                 </th>
-                @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
-                {
-                    <th>Acciones</th>
-                }
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -57,24 +62,31 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Stock)
                 </td>
-                @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
-                {
-                    <td>
+                <td>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
+                    {
                         <div class="btn-group" role="group">
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Detalles</a>
                             <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
                         </div>
-                    </td>
-                }
-                else
-                {
-                    <td>
+                    }
+                    else
+                    {
                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Ver detalles</a>
-                    </td>
-                }
+                    }
+                </td>
             </tr>
         }
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script>
+        // Auto-close alerts after 5 seconds
+        setTimeout(function () {
+            $('.alert').alert('close');
+        }, 5000);
+    </script>
+}

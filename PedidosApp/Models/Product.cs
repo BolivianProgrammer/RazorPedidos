@@ -9,7 +9,7 @@ namespace PedidosApp.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
+        [Required(ErrorMessage = "El nombre del producto es obligatorio")]
         [StringLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres")]
         [Display(Name = "Nombre")]
         public string Name { get; set; } = string.Empty;
@@ -19,14 +19,15 @@ namespace PedidosApp.Models
         public string Description { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El precio es obligatorio")]
-        [Range(0.01, 999999.99, ErrorMessage = "El precio debe estar entre 0.01 y 999,999.99")]
+        [Range(0.01, 999999.99, ErrorMessage = "El precio debe ser mayor a 0 y menor a 999,999.99")]
         [Column(TypeName = "decimal(10, 2)")]
         [Display(Name = "Precio")]
         [DisplayFormat(DataFormatString = "{0:C2}", ApplyFormatInEditMode = false)]
+        [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El precio debe tener un formato válido (ejemplo: 10.99)")]
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "El stock es obligatorio")]
-        [Range(0, int.MaxValue, ErrorMessage = "El stock debe ser un valor positivo")]
+        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo")]
         [Display(Name = "Stock")]
         public int Stock { get; set; }
 

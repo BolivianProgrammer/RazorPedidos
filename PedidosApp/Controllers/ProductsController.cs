@@ -58,11 +58,22 @@ namespace PedidosApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description,Price,Stock")] Product product)
         {
+            if (product.Price <= 0)
+            {
+                ModelState.AddModelError("Price", "El precio debe ser mayor que 0");
+            }
+            
+            if (product.Stock < 0)
+            {
+                ModelState.AddModelError("Stock", "El stock no puede ser negativo");
+            }
+
             if (ModelState.IsValid)
             {
                 product.CreatedAt = DateTime.Now;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Producto creado exitosamente";
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -93,12 +104,21 @@ namespace PedidosApp.Controllers
             {
                 return NotFound();
             }
+            
+            if (product.Price <= 0)
+            {
+                ModelState.AddModelError("Price", "El precio debe ser mayor que 0");
+            }
+            
+            if (product.Stock < 0)
+            {
+                ModelState.AddModelError("Stock", "El stock no puede ser negativo");
+            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Retrieve the original product to keep CreatedAt
                     var originalProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
                     if (originalProduct != null)
                     {
@@ -108,6 +128,7 @@ namespace PedidosApp.Controllers
                     product.UpdatedAt = DateTime.Now;
                     _context.Update(product);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Producto actualizado exitosamente";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -153,6 +174,7 @@ namespace PedidosApp.Controllers
             {
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Producto eliminado exitosamente";
             }
             
             return RedirectToAction(nameof(Index));
