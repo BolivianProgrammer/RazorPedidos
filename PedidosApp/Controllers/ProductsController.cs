@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PedidosApp.Data;
 using PedidosApp.Models;
-using PedidosApp.ViewModels;
 
 namespace PedidosApp.Controllers
 {
@@ -24,67 +23,9 @@ namespace PedidosApp.Controllers
 
         // GET: Products
         [AllowAnonymous] // Anyone can view products
-        public async Task<IActionResult> Index(
-            string searchString,
-            decimal? minPrice,
-            decimal? maxPrice,
-            string sortOrder)
+        public async Task<IActionResult> Index()
         {
-            // Create the view model
-            var viewModel = new ProductListViewModel
-            {
-                SearchString = searchString,
-                MinPrice = minPrice,
-                MaxPrice = maxPrice,
-                SortOrder = sortOrder
-            };
-
-            // Start with all products
-            var productsQuery = _context.Products.AsQueryable();
-
-            // Apply search filter
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                productsQuery = productsQuery.Where(p => 
-                    p.Name.Contains(searchString) || 
-                    (p.Description != null && p.Description.Contains(searchString)));
-            }
-
-            // Apply price range filter
-            if (minPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
-            }
-
-            if (maxPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
-            }
-
-            // Handle sorting
-            viewModel.NameSortParam = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            viewModel.PriceSortParam = sortOrder == "price" ? "price_desc" : "price";
-
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    productsQuery = productsQuery.OrderByDescending(p => p.Name);
-                    break;
-                case "price":
-                    productsQuery = productsQuery.OrderBy(p => p.Price);
-                    break;
-                case "price_desc":
-                    productsQuery = productsQuery.OrderByDescending(p => p.Price);
-                    break;
-                default:
-                    productsQuery = productsQuery.OrderBy(p => p.Name);
-                    break;
-            }
-
-            // Execute the query and set the Products property
-            viewModel.Products = await productsQuery.ToListAsync();
-
-            return View(viewModel);
+            return View(await _context.Products.ToListAsync());
         }
 
         // GET: Products/Details/5
@@ -117,7 +58,6 @@ namespace PedidosApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description,Price,Stock")] Product product)
         {
-            // Additional validation for positive price and non-negative stock
             if (product.Price <= 0)
             {
                 ModelState.AddModelError("Price", "El precio debe ser mayor que 0");
@@ -165,7 +105,6 @@ namespace PedidosApp.Controllers
                 return NotFound();
             }
             
-            // Additional validation for positive price and non-negative stock
             if (product.Price <= 0)
             {
                 ModelState.AddModelError("Price", "El precio debe ser mayor que 0");
@@ -180,7 +119,6 @@ namespace PedidosApp.Controllers
             {
                 try
                 {
-                    // Retrieve the original product to keep CreatedAt
                     var originalProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
                     if (originalProduct != null)
                     {
