@@ -1,0 +1,151 @@
+@model PedidosApp.ViewModels.CreateOrderViewModel
+
+@{
+    ViewData["Title"] = "Crear Pedido";
+}
+
+<h1>Crear Pedido</h1>
+
+<hr />
+
+<form asp-action="Create" id="orderForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Información del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        <label asp-for="Order.UserId" class="control-label">Cliente</label>
+                        <select asp-for="Order.UserId" class="form-select" asp-items="ViewBag.UserSelectList">
+                            <option value="">-- Seleccione Cliente --</option>
+                        </select>
+                        <span asp-validation-for="Order.UserId" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Los pedidos nuevos se crean automáticamente con estado <strong>Pendiente</strong>. 
+                        Podrá cambiar el estado del pedido después de crearlo.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Productos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>Seleccionar</th>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Products.Count; i++)
+                                {
+                                    var product = Model.Products[i];
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input product-checkbox" 
+                                                   data-product-id="@product.Id" data-product-price="@product.Price" />
+                                            <input type="hidden" name="SelectedProductIds" class="selected-product-id" disabled />
+                                        </td>
+                                        <td>@product.Name</td>
+                                        <td>@product.Price.ToString("C2")</td>
+                                        <td>@product.Stock</td>
+                                        <td>
+                                            <input type="number" name="Quantities" class="form-control quantity-input" 
+                                                   min="1" max="@product.Stock" value="1" disabled />
+                                        </td>
+                                        <td class="subtotal">$0.00</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="5" class="text-end">Total:</th>
+                                    <th id="orderTotal">$0.00</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Crear Pedido" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            
+            $('.product-checkbox').change(function () {
+                var row = $(this).closest('tr');
+                var quantityInput = row.find('.quantity-input');
+                var hiddenInput = row.find('.selected-product-id');
+                
+                if ($(this).is(':checked')) {
+                    quantityInput.prop('disabled', false);
+                    hiddenInput.prop('disabled', false);
+                    hiddenInput.val($(this).data('product-id'));
+                    updateSubtotal(row);
+                } else {
+                    quantityInput.prop('disabled', true);
+                    hiddenInput.prop('disabled', true);
+                    row.find('.subtotal').text('$0.00');
+                }
+                
+                updateTotal();
+            });
+            
+            $('.quantity-input').change(function () {
+                var row = $(this).closest('tr');
+                if (row.find('.product-checkbox').is(':checked')) {
+                    updateSubtotal(row);
+                    updateTotal();
+                }
+            });
+            
+            function updateSubtotal(row) {
+                var price = parseFloat(row.find('.product-checkbox').data('product-price'));
+                var quantity = parseInt(row.find('.quantity-input').val());
+                var subtotal = price * quantity;
+                row.find('.subtotal').text('$' + subtotal.toFixed(2));
+            }
+            
+            function updateTotal() {
+                var total = 0;
+                $('.product-checkbox:checked').each(function () {
+                    var row = $(this).closest('tr');
+                    var price = parseFloat($(this).data('product-price'));
+                    var quantity = parseInt(row.find('.quantity-input').val());
+                    total += price * quantity;
+                });
+                
+                $('#orderTotal').text('$' + total.toFixed(2));
+            }
+        });
+    </script>
+}

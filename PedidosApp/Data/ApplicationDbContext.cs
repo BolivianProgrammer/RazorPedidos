@@ -20,27 +20,22 @@ namespace PedidosApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure User entity
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Configure Product entity
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(10, 2)");
 
-            // Configure Order entity
             modelBuilder.Entity<Order>()
                 .Property(o => o.Total)
                 .HasColumnType("decimal(10, 2)");
 
-            // Configure OrderItem entity
             modelBuilder.Entity<OrderItem>()
                 .Property(oi => oi.Subtotal)
                 .HasColumnType("decimal(10, 2)");
                 
-            // Configure relationships
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
