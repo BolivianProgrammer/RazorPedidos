@@ -169,4 +169,3 @@ C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Deb
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\PedidosApp.pdb
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\PedidosApp.genruntimeconfig.cache
 C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\ref\PedidosApp.dll
-C:\UNI4TO\Cuarto Semestre\Prog Web 3\MVC_Pedidos\RazorPedidos\PedidosApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,6 +35,9 @@ namespace PedidosApp.Models
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = false)]
         public DateTime? UpdatedAt { get; set; }
+        
+        // Navigation property for orders
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 
     public enum UserRole
