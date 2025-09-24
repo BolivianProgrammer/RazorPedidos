@@ -1,4 +1,4 @@
-@model IEnumerable<PedidosApp.Models.Product>
+@model PedidosApp.ViewModels.ProductListViewModel
 
 @{
     ViewData["Title"] = "Productos";
@@ -14,6 +14,32 @@
     </div>
 }
 
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Buscar y Filtrar</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="searchString" class="form-label">Buscar por nombre o descripción:</label>
+                <input type="text" id="searchString" name="searchString" class="form-control" value="@Model.SearchString" placeholder="Nombre o descripción...">
+            </div>
+            <div class="col-md-2">
+                <label for="minPrice" class="form-label">Precio mínimo:</label>
+                <input type="number" id="minPrice" name="minPrice" class="form-control" value="@Model.MinPrice" min="0" step="0.01" placeholder="Min">
+            </div>
+            <div class="col-md-2">
+                <label for="maxPrice" class="form-label">Precio máximo:</label>
+                <input type="number" id="maxPrice" name="maxPrice" class="form-control" value="@Model.MaxPrice" min="0" step="0.01" placeholder="Max">
+            </div>
+            <div class="col-md-4 align-self-end">
+                <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                <a asp-action="Index" class="btn btn-secondary">Limpiar filtros</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
 {
     <p>
@@ -26,67 +52,83 @@
         <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Name)
+                    <a asp-action="Index" asp-route-sortOrder="@Model.NameSortParam" asp-route-searchString="@Model.SearchString" 
+                       asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">
+                        Nombre
+                        @if (string.IsNullOrEmpty(Model.SortOrder) || Model.SortOrder == "name_desc")
+                        {
+                            <i class="@(string.IsNullOrEmpty(Model.SortOrder) ? "bi bi-sort-alpha-down" : "bi bi-sort-alpha-up")"></i>
+                        }
+                    </a>
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Description)
+                    Descripción
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Price)
+                    <a asp-action="Index" asp-route-sortOrder="@Model.PriceSortParam" asp-route-searchString="@Model.SearchString"
+                       asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">
+                        Precio
+                        @if (Model.SortOrder == "price" || Model.SortOrder == "price_desc")
+                        {
+                            <i class="@(Model.SortOrder == "price" ? "bi bi-sort-numeric-down" : "bi bi-sort-numeric-up")"></i>
+                        }
+                    </a>
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Stock)
+                    Stock
                 </th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-        @foreach (var item in Model) {
+        @if (Model.Products.Any())
+        {
+            @foreach (var item in Model.Products) {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Description) && item.Description.Length > 50)
+                        {
+                            @(item.Description.Substring(0, 47) + "...")
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(modelItem => item.Description)
+                        }
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Stock)
+                    </td>
+                    <td>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
+                        {
+                            <div class="btn-group" role="group">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Ver detalles</a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @if (item.Description.Length > 50)
-                    {
-                        @(item.Description.Substring(0, 47) + "...")
-                    }
-                    else
-                    {
-                        @Html.DisplayFor(modelItem => item.Description)
-                    }
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Stock)
-                </td>
-                <td>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
-                    {
-                        <div class="btn-group" role="group">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Detalles</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Ver detalles</a>
-                    }
+                <td colspan="5" class="text-center">
+                    No se encontraron productos que coincidan con los criterios de búsqueda.
                 </td>
             </tr>
         }
         </tbody>
     </table>
 </div>
-
-@section Scripts {
-    <script>
-        // Auto-close alerts after 5 seconds
-        setTimeout(function () {
-            $('.alert').alert('close');
-        }, 5000);
-    </script>
-}

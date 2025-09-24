@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PedidosApp.Data;
 using PedidosApp.Models;
+using PedidosApp.ViewModels;
 
 namespace PedidosApp.Controllers
 {
@@ -22,14 +23,66 @@ namespace PedidosApp.Controllers
         }
 
         // GET: Products
-        [AllowAnonymous] // Anyone can view products
-        public async Task<IActionResult> Index()
+        [AllowAnonymous] 
+        public async Task<IActionResult> Index(
+            string searchString,
+            decimal? minPrice,
+            decimal? maxPrice,
+            string sortOrder)
         {
-            return View(await _context.Products.ToListAsync());
+            var viewModel = new ProductListViewModel
+            {
+                SearchString = searchString,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                SortOrder = sortOrder
+            };
+
+            var productsQuery = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                productsQuery = productsQuery.Where(p =>
+                    p.Name.Contains(searchString) ||
+                    (p.Description != null && p.Description.Contains(searchString)));
+            }
+
+            if (minPrice.HasValue)
+            {
+                productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            viewModel.NameSortParam = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            viewModel.PriceSortParam = sortOrder == "price" ? "price_desc" : "price";
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    productsQuery = productsQuery.OrderByDescending(p => p.Name);
+                    break;
+                case "price":
+                    productsQuery = productsQuery.OrderBy(p => p.Price);
+                    break;
+                case "price_desc":
+                    productsQuery = productsQuery.OrderByDescending(p => p.Price);
+                    break;
+                default:
+                    productsQuery = productsQuery.OrderBy(p => p.Name);
+                    break;
+            }
+
+            viewModel.Products = await productsQuery.ToListAsync();
+
+            return View(viewModel);
         }
 
         // GET: Products/Details/5
-        [AllowAnonymous] // Anyone can view product details
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -62,7 +115,7 @@ namespace PedidosApp.Controllers
             {
                 ModelState.AddModelError("Price", "El precio debe ser mayor que 0");
             }
-            
+
             if (product.Stock < 0)
             {
                 ModelState.AddModelError("Stock", "El stock no puede ser negativo");
@@ -104,12 +157,12 @@ namespace PedidosApp.Controllers
             {
                 return NotFound();
             }
-            
+
             if (product.Price <= 0)
             {
                 ModelState.AddModelError("Price", "El precio debe ser mayor que 0");
             }
-            
+
             if (product.Stock < 0)
             {
                 ModelState.AddModelError("Stock", "El stock no puede ser negativo");
@@ -124,7 +177,7 @@ namespace PedidosApp.Controllers
                     {
                         product.CreatedAt = originalProduct.CreatedAt;
                     }
-                    
+
                     product.UpdatedAt = DateTime.Now;
                     _context.Update(product);
                     await _context.SaveChangesAsync();
@@ -176,7 +229,7 @@ namespace PedidosApp.Controllers
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Producto eliminado exitosamente";
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 
