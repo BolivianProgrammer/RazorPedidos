@@ -42,7 +42,8 @@ namespace PedidosApp.Controllers
                     {
                         new Claim(ClaimTypes.Name, user.Name),
                         new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.Role, user.Role.ToString())
+                        new Claim(ClaimTypes.Role, user.Role.ToString()),
+                        new Claim("UserId", user.Id.ToString()) 
                     };
 
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -75,6 +76,11 @@ namespace PedidosApp.Controllers
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             ViewData["Role"] = role;
             
+            return View();
+        }
+        
+        public IActionResult AccessDenied()
+        {
             return View();
         }
     }

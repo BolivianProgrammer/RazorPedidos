@@ -4,55 +4,151 @@
     ViewData["Title"] = "Detalles del Producto";
 }
 
-<h1>Detalles del Producto</h1>
-
-<div class="card">
-    <div class="card-body">
-        <h3 class="card-title">@Html.DisplayFor(model => model.Name)</h3>
-        <hr />
-        <dl class="row">
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Description)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Description)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Price)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Price)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Stock)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Stock)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.CreatedAt)
-            </dd>
-            @if (Model.UpdatedAt.HasValue)
-            {
-                <dt class="col-sm-3">
-                    @Html.DisplayNameFor(model => model.UpdatedAt)
-                </dt>
-                <dd class="col-sm-9">
-                    @Html.DisplayFor(model => model.UpdatedAt)
-                </dd>
-            }
-        </dl>
+<div class="row">
+    <div class="col-md-8">
+        <h1>@Model.Name</h1>
     </div>
-    <div class="card-footer">
-        <div>
-            @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
-            {
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
-            }
-            <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
-        </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la Lista
+        </a>
     </div>
 </div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Descripción</h5>
+                <p class="card-text">@(string.IsNullOrEmpty(Model.Description) ? "Sin descripción" : Model.Description)
+                </p>
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-3">Precio:</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Price)</dd>
+
+                    <dt class="col-sm-3">Stock:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Stock > 10)
+                        {
+                            <span class="badge bg-success">@Model.Stock disponibles</span>
+                        }
+                        else if (Model.Stock > 0)
+                        {
+                            <span class="badge bg-warning text-dark">¡Solo quedan @Model.Stock!</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Agotado</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Fecha de creación:</dt>
+                    <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Última actualización:</dt>
+                        <dd class="col-sm-9">@Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        @if (User.Identity.IsAuthenticated && User.IsInRole("Cliente") && Model.Stock > 0)
+        {
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Comprar ahora</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Purchase" method="post">
+                        <input type="hidden" name="ProductId" value="@Model.Id" />
+                        <div class="form-group mb-3">
+                            <label for="quantity" class="form-label">Cantidad:</label>
+                            <input type="number" name="Quantity" id="quantity" class="form-control"
+                                  value="1" min="1" max="@Model.Stock" required />
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-cart-plus"></i> Realizar Pedido
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <span>Precio unitario:</span>
+                        <strong>@Model.Price.ToString("C2")</strong>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.Identity.IsAuthenticated && User.IsInRole("Cliente") && Model.Stock <= 0)
+        {
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Producto agotado</h5>
+                </div>
+                <div class="card-body">
+                    <p>Lo sentimos, este producto está temporalmente agotado.</p>
+                </div>
+            </div>
+        }
+        else if (!User.Identity.IsAuthenticated)
+        {
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Iniciar sesión para comprar</h5>
+                </div>
+                <div class="card-body">
+                    <p>Para realizar un pedido, necesitas iniciar sesión primero.</p>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                    </a>
+                </div>
+            </div>
+        }
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
+        {
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Acciones administrativas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary flex-grow-1">Editar</a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger flex-grow-1">Eliminar</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+
+        $(document).ready(function() {
+            var unitPrice = @Html.Raw(Json.Serialize(Model.Price));
+            $('#quantity').on('change', function() {
+                var quantity = $(this).val();
+                var total = unitPrice * quantity;
+                $('#total').text('$' + total.toFixed(2));
+            });
+        });
+    </script>
+}

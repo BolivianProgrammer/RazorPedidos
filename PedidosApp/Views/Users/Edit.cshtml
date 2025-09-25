@@ -1,10 +1,12 @@
 @model PedidosApp.Models.User
 
 @{
-    ViewData["Title"] = "Editar Cliente";
+    ViewData["Title"] = "Editar Usuario";
+    bool isEditingSelf = (bool)(ViewData["IsEditingSelf"] ?? false);
+    bool canChangePassword = (bool)(ViewData["CanChangePassword"] ?? false);
 }
 
-<h1>Editar Cliente</h1>
+<h1>@(isEditingSelf ? "Editar Mi Perfil" : "Editar Usuario")</h1>
 
 <hr />
 <div class="row">
@@ -23,18 +25,40 @@
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="Password" class="control-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
                 <label asp-for="Role" class="control-label">Rol</label>
                 <select asp-for="Role" class="form-control" asp-items="ViewBag.Roles"></select>
                 <span asp-validation-for="Role" class="text-danger"></span>
             </div>
+            
+            @if (canChangePassword)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="Password" class="control-label">Contraseña</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Dejar en blanco para mantener la contraseña actual" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                    <small class="form-text text-muted">
+                        Dejar en blanco para mantener la contraseña actual. Mínimo 6 caracteres.
+                    </small>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Solo el usuario puede cambiar su propia contraseña por motivos de seguridad.
+                </div>
+            }
+            
             <div class="form-group mb-3">
                 <button type="submit" class="btn btn-primary">Guardar</button>
-                <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+                @if (!isEditingSelf)
+                {
+                    <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+                }
+                else
+                {
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Volver al Inicio</a>
+                }
             </div>
         </form>
     </div>

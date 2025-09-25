@@ -11,7 +11,6 @@ using PedidosApp.Models;
 
 namespace PedidosApp.Controllers
 {
-    [Authorize(Roles = "Admin,Empleado")]
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,12 +21,20 @@ namespace PedidosApp.Controllers
         }
 
         // GET: Users
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+            
+            var users = await _context.Users
+                .Where(u => u.Id != currentUserId)
+                .ToListAsync();
+                
+            return View(users);
         }
 
         // GET: Users/Details/5
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -46,9 +53,9 @@ namespace PedidosApp.Controllers
         }
 
         // GET: Users/Create
+        [Authorize(Roles = "Admin,Empleado")]
         public IActionResult Create()
         {
-            // For Empleados, only allow creating Cliente role
             if (User.IsInRole("Empleado"))
             {
                 ViewData["Roles"] = new SelectList(new[] { UserRole.Cliente });
@@ -63,9 +70,9 @@ namespace PedidosApp.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> Create([Bind("Name,Email,Password,Role")] User user)
         {
-            // If user is Empleado, enforce that they can only create Cliente accounts
             if (User.IsInRole("Empleado") && user.Role != UserRole.Cliente)
             {
                 ModelState.AddModelError("Role", "Como Empleado, solo puedes crear cuentas de Cliente");
@@ -73,13 +80,12 @@ namespace PedidosApp.Controllers
 
             if (ModelState.IsValid)
             {
-                user.CreatedAt = DateTime.Now; // Use local time for consistency
+                user.CreatedAt = DateTime.Now; 
                 _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             
-            // Re-populate roles dropdown based on user role
             if (User.IsInRole("Empleado"))
             {
                 ViewData["Roles"] = new SelectList(new[] { UserRole.Cliente });
@@ -92,6 +98,7 @@ namespace PedidosApp.Controllers
         }
 
         // GET: Users/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -105,48 +112,93 @@ namespace PedidosApp.Controllers
                 return NotFound();
             }
             
-            // For Empleados, don't allow editing Admin or Empleado roles
-            if (User.IsInRole("Empleado") && (user.Role == UserRole.Admin || user.Role == UserRole.Empleado))
+            int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+
+            bool isEditingSelf = currentUserId == user.Id;
+            
+            if (User.IsInRole("Cliente") && !isEditingSelf)
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
             
-            // Set up role dropdown based on user's role
-            if (User.IsInRole("Empleado"))
+            if (User.IsInRole("Empleado") && !isEditingSelf && user.Role != UserRole.Cliente)
             {
-                // Empleados can only set Cliente role
+                return RedirectToAction("AccessDenied", "Account");
+            }
+            
+            user.Password = string.Empty;
+            
+            if (User.IsInRole("Cliente") || isEditingSelf)
+            {
+                
+                ViewData["Roles"] = new SelectList(new[] { user.Role });
+                ViewData["CanChangePassword"] = true;
+            }
+            else if (User.IsInRole("Empleado"))
+            {
                 ViewData["Roles"] = new SelectList(new[] { UserRole.Cliente });
+                ViewData["CanChangePassword"] = false; 
             }
             else
             {
                 ViewData["Roles"] = new SelectList(Enum.GetValues(typeof(UserRole)));
+                ViewData["CanChangePassword"] = false; 
             }
             
+            ViewData["IsEditingSelf"] = isEditingSelf;
             return View(user);
         }
 
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Password,Role")] User user)
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Role,Password")] User user)
         {
             if (id != user.Id)
             {
                 return NotFound();
             }
 
-            // If user is Empleado, ensure they're not changing roles to Admin/Empleado
-            if (User.IsInRole("Empleado"))
+            int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+
+            bool isEditingSelf = currentUserId == user.Id;
+
+            if (User.IsInRole("Cliente") && !isEditingSelf)
             {
-                var originalUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                if (originalUser != null && (originalUser.Role == UserRole.Admin || originalUser.Role == UserRole.Empleado))
-                {
-                    return RedirectToAction("AccessDenied", "Account");
-                }
-                
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            if (User.IsInRole("Empleado") && !isEditingSelf && user.Role != UserRole.Cliente)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            var originalUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+            if (originalUser == null)
+            {
+                return NotFound();
+            }
+            
+            if (!isEditingSelf)
+            {
+                user.Password = originalUser.Password;
+            }
+            else if (string.IsNullOrWhiteSpace(user.Password))
+            {
+                user.Password = originalUser.Password;
+            }
+
+            if (isEditingSelf && !User.IsInRole("Admin"))
+            {
+                user.Role = originalUser.Role;
+            }
+            else if (User.IsInRole("Empleado") && !isEditingSelf)
+            {
                 if (user.Role != UserRole.Cliente)
                 {
                     ModelState.AddModelError("Role", "Como Empleado, solo puedes asignar el rol de Cliente");
+                    user.Role = UserRole.Cliente;
                 }
             }
 
@@ -154,16 +206,20 @@ namespace PedidosApp.Controllers
             {
                 try
                 {
-                    // Retrieve the original user to keep CreatedAt
-                    var originalUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                    if (originalUser != null)
-                    {
-                        user.CreatedAt = originalUser.CreatedAt;
-                    }
+                    user.CreatedAt = originalUser.CreatedAt;
+                    user.UpdatedAt = DateTime.Now; 
                     
-                    user.UpdatedAt = DateTime.Now; // Use local time for consistency
                     _context.Update(user);
                     await _context.SaveChangesAsync();
+                    
+                    if (isEditingSelf)
+                    {
+                        TempData["Success"] = "Tu perfil ha sido actualizado exitosamente";
+                    }
+                    else
+                    {
+                        TempData["Success"] = "Usuario actualizado exitosamente";
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -176,22 +232,37 @@ namespace PedidosApp.Controllers
                         throw;
                     }
                 }
+                
+                if (isEditingSelf && User.IsInRole("Cliente"))
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                
                 return RedirectToAction(nameof(Index));
             }
             
-            // Re-populate roles dropdown based on user role
-            if (User.IsInRole("Empleado"))
+            if (User.IsInRole("Cliente") || isEditingSelf)
+            {
+                ViewData["Roles"] = new SelectList(new[] { user.Role });
+                ViewData["CanChangePassword"] = true; 
+            }
+            else if (User.IsInRole("Empleado"))
             {
                 ViewData["Roles"] = new SelectList(new[] { UserRole.Cliente });
+                ViewData["CanChangePassword"] = false; 
             }
-            else
+            else 
             {
                 ViewData["Roles"] = new SelectList(Enum.GetValues(typeof(UserRole)));
+                ViewData["CanChangePassword"] = false; 
             }
+            
+            ViewData["IsEditingSelf"] = isEditingSelf;
             return View(user);
         }
 
         // GET: Users/Delete/5
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -206,7 +277,13 @@ namespace PedidosApp.Controllers
                 return NotFound();
             }
             
-            // Empleados cannot delete Admin or Empleado users
+            int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+
+            if (currentUserId == user.Id)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+            
             if (User.IsInRole("Empleado") && (user.Role == UserRole.Admin || user.Role == UserRole.Empleado))
             {
                 return RedirectToAction("AccessDenied", "Account");
@@ -218,6 +295,7 @@ namespace PedidosApp.Controllers
         // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -226,7 +304,13 @@ namespace PedidosApp.Controllers
                 return NotFound();
             }
             
-            // Empleados cannot delete Admin or Empleado users
+            int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+
+            if (currentUserId == user.Id)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+            
             if (User.IsInRole("Empleado") && (user.Role == UserRole.Admin || user.Role == UserRole.Empleado))
             {
                 return RedirectToAction("AccessDenied", "Account");

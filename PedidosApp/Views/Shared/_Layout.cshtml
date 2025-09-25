@@ -53,8 +53,14 @@
                                     <span class="text-light">@User.Identity.Name</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="UserInfo">Mi Perfil</a></li>
-                                    <li><hr class="dropdown-divider"></li>
+                                    @{
+                                        int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+                                    }
+                                    @if (currentUserId > 0)
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Edit" asp-route-id="@currentUserId">Editar Perfil</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    }
                                     <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Cerrar Sesión</a></li>
                                 </ul>
                             </li>

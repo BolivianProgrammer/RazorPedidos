@@ -36,7 +36,6 @@ namespace PedidosApp.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = false)]
         public DateTime? UpdatedAt { get; set; }
         
-        // Navigation property for orders
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 

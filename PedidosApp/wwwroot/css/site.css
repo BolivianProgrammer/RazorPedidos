@@ -35,7 +35,6 @@ body {
   color: var(--dark-text);
 }
 
-/* Dark navbar */
 .navbar {
   background-color: var(--darker-bg) !important;
   border-bottom: 1px solid var(--dark-border) !important;
@@ -49,7 +48,6 @@ body {
   color: var(--accent-color) !important;
 }
 
-/* Dark cards */
 .card {
   background-color: var(--dark-card);
   border: 1px solid var(--dark-border);
@@ -63,7 +61,6 @@ body {
   color: var(--dark-text-secondary);
 }
 
-/* Dark inputs and forms */
 .form-control {
   background-color: var(--darker-bg);
   border: 1px solid var(--dark-border);
@@ -75,7 +72,6 @@ body {
   color: var(--dark-text);
 }
 
-/* Dark footer */
 .footer {
   background-color: var(--darker-bg);
   border-top: 1px solid var(--dark-border);
@@ -91,7 +87,6 @@ body {
   text-decoration: none;
 }
 
-/* Override bootstrap text colors */
 .text-dark {
   color: var(--dark-text) !important;
 }
@@ -100,7 +95,6 @@ body {
   color: var(--dark-text-secondary) !important;
 }
 
-/* Custom button styles */
 .btn-primary {
   background-color: var(--accent-color);
   border-color: var(--accent-color);
@@ -111,7 +105,6 @@ body {
   border-color: var(--accent-hover);
 }
 
-/* Table styles - SIMPLIFIED */
 .table {
   color: white !important;
 }
@@ -120,7 +113,6 @@ body {
   color: white !important;
 }
 
-/* Ensure links in tables are visible */
 .table a {
   color: #52a8ff !important;
 }
@@ -129,7 +121,6 @@ body {
   color: #78bdff !important;
 }
 
-/* Dropdown menu */
 .dropdown-menu {
   background-color: var(--dark-card);
   border: 1px solid var(--dark-border);

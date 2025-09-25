@@ -12,7 +12,6 @@ using PedidosApp.ViewModels;
 
 namespace PedidosApp.Controllers
 {
-    [Authorize(Roles = "Admin,Empleado")]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -100,7 +99,69 @@ namespace PedidosApp.Controllers
             return View(product);
         }
 
+        // POST: Products/Purchase
+        [HttpPost]
+        [Authorize(Roles = "Cliente")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Purchase(AddToCartViewModel model)
+        {
+            if (model.Quantity <= 0)
+            {
+                TempData["Error"] = "La cantidad debe ser mayor que cero.";
+                return RedirectToAction("Details", new { id = model.ProductId });
+            }
+
+            var product = await _context.Products.FindAsync(model.ProductId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            if (product.Stock < model.Quantity)
+            {
+                TempData["Error"] = "No hay suficiente stock disponible.";
+                return RedirectToAction("Details", new { id = model.ProductId });
+            }
+
+            int.TryParse(User.FindFirst("UserId")?.Value, out int currentUserId);
+            var user = await _context.Users.FindAsync(currentUserId);
+            if (user == null)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            decimal subtotal = product.Price * model.Quantity;
+
+            var order = new Order
+            {
+                UserId = currentUserId,
+                OrderDate = DateTime.Now,
+                Status = OrderStatus.Pending,
+                Total = subtotal
+            };
+
+            var orderItem = new OrderItem
+            {
+                ProductId = model.ProductId,
+                Quantity = model.Quantity,
+                Subtotal = subtotal
+            };
+
+            order.OrderItems = new List<OrderItem> { orderItem };
+
+            product.Stock -= model.Quantity;
+            product.UpdatedAt = DateTime.Now;
+
+            _context.Orders.Add(order);
+            _context.Update(product);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Pedido realizado exitosamente. Total: {subtotal:C2}";
+            return RedirectToAction("Index", "Home");
+        }
+
         // GET: Products/Create
+        [Authorize(Roles = "Admin,Empleado")]
         public IActionResult Create()
         {
             return View();
@@ -108,6 +169,7 @@ namespace PedidosApp.Controllers
 
         // POST: Products/Create
         [HttpPost]
+        [Authorize(Roles = "Admin,Empleado")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description,Price,Stock")] Product product)
         {
@@ -133,6 +195,7 @@ namespace PedidosApp.Controllers
         }
 
         // GET: Products/Edit/5
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -150,6 +213,7 @@ namespace PedidosApp.Controllers
 
         // POST: Products/Edit/5
         [HttpPost]
+        [Authorize(Roles = "Admin,Empleado")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,Stock")] Product product)
         {
@@ -200,6 +264,7 @@ namespace PedidosApp.Controllers
         }
 
         // GET: Products/Delete/5
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -219,6 +284,7 @@ namespace PedidosApp.Controllers
 
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin,Empleado")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
